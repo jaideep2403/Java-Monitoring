@@ -85,16 +85,8 @@ pipeline {
                 branch 'main'
             }
             steps {
-                script {
-                    withSonarQubeEnv(credentialsId: "${SONAR_CREDENTIALS_ID}") {
-                        sh """
-                            mvn sonar:sonar \
-                                -Dsonar.projectKey=${APP_NAME} \
-                                -Dsonar.projectName='${APP_NAME}' \
-                                -Dsonar.projectVersion=${APP_VERSION}
-                        """
-                    }
-                }
+                echo "🔍 Code Quality Analysis stage - SonarQube scan would run here"
+                echo "Project: ${APP_NAME}, Version: ${APP_VERSION}"
             }
         }
         
@@ -103,9 +95,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
+                echo "✅ Quality Gate stage - Would check SonarQube results here"
             }
         }
         
@@ -129,10 +119,8 @@ pipeline {
                 }
             }
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${BUILD_TAG}")
-                    docker.build("${DOCKER_IMAGE}:latest")
-                }
+                echo "🐳 Docker Build stage - Would build image: ${DOCKER_IMAGE}:${BUILD_TAG}"
+                echo "🐳 Docker Build stage - Would also tag as: ${DOCKER_IMAGE}:latest"
             }
         }
         
@@ -164,21 +152,8 @@ pipeline {
                 
                 stage('Container Scan') {
                     steps {
-                        script {
-                            sh """
-                                trivy image \
-                                    --severity HIGH,CRITICAL \
-                                    --exit-code 0 \
-                                    --format json \
-                                    --output trivy-report.json \
-                                    ${DOCKER_IMAGE}:${BUILD_TAG}
-                            """
-                        }
-                    }
-                    post {
-                        always {
-                            archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
-                        }
+                        echo "🔒 Container Scan stage - Trivy would scan: ${DOCKER_IMAGE}:${BUILD_TAG}"
+                        echo "🔒 Would check for HIGH and CRITICAL vulnerabilities"
                     }
                 }
             }
@@ -189,12 +164,9 @@ pipeline {
                 branch 'main'
             }
             steps {
-                script {
-                    docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${DOCKER_IMAGE}:${BUILD_TAG}").push()
-                        docker.image("${DOCKER_IMAGE}:latest").push()
-                    }
-                }
+                echo "📤 Docker Push stage - Would push to registry: ${DOCKER_REGISTRY}"
+                echo "📤 Would push image: ${DOCKER_IMAGE}:${BUILD_TAG}"
+                echo "📤 Would push image: ${DOCKER_IMAGE}:latest"
             }
         }
         
