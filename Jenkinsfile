@@ -1,21 +1,6 @@
 pipeline {
     agent any
-    
-    tools {
-        maven 'Maven 3.9'
-        jdk 'JDK 17'
-    }
-    
-    environment {
-        APP_NAME = 'java-demoapp'
-        APP_VERSION = '1.0.0'
-        DOCKER_REGISTRY = 'ghcr.io'
-        DOCKER_IMAGE = "${DOCKER_REGISTRY}/${DOCKER_REPO}/${APP_NAME}"
-        DOCKER_CREDENTIALS_ID = 'docker-registry-credentials'
-        MAVEN_OPTS = '-Xmx1024m -XX:MaxPermSize=256m'
-        SONAR_HOST_URL = "${env.SONAR_HOST_URL ?: 'http://sonarqube:9000'}"
-        SONAR_CREDENTIALS_ID = 'sonarqube-token'
-    }
+        
     
     options {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '5'))
